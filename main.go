@@ -1,16 +1,24 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"net/smtp"
 	"os"
 
 	"github.com/joho/godotenv"
 )
 
-func sendEmailSimpleHTML(subject string, html string, to []string) {
+func sendEmailSimpleHTML(subject string, templatePath string, to []string) {
 
-	erro := godotenv.Load()
+	var body bytes.Buffer
+
+	t, err := template.ParseFiles(templatePath)
+
+	t.Execute(&body, struct{ Name string }{Name: "Charles"})
+
+	err = godotenv.Load()
 	password := os.Getenv("EMAILPASSWORD")
 
 	auth := smtp.PlainAuth(
@@ -20,9 +28,9 @@ func sendEmailSimpleHTML(subject string, html string, to []string) {
 		"smtp.gmail.com",
 	)
 	headers := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";"
-	msg := "Subject:" + subject + "\n" + headers + "\n\n" + html
+	msg := "Subject:" + subject + "\n" + headers + "\n\n" + body.String()
 
-	err := smtp.SendMail(
+	err = smtp.SendMail(
 		"smtp.gmail.com:587",
 		auth,
 		"charlesemilienpoulin@gmail.com",
@@ -33,14 +41,11 @@ func sendEmailSimpleHTML(subject string, html string, to []string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	if erro != nil {
-		fmt.Println(erro)
-	}
 }
 
 func sendEmailSimple(subject string, body string, to []string) {
 
-	erro := godotenv.Load()
+	err := godotenv.Load()
 	password := os.Getenv("EMAILPASSWORD")
 
 	auth := smtp.PlainAuth(
@@ -52,7 +57,7 @@ func sendEmailSimple(subject string, body string, to []string) {
 
 	msg := "Subject:" + subject + "\n" + body
 
-	err := smtp.SendMail(
+	err = smtp.SendMail(
 		"smtp.gmail.com:587",
 		auth,
 		"charlesemilienpoulin@gmail.com",
@@ -63,9 +68,6 @@ func sendEmailSimple(subject string, body string, to []string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	if erro != nil {
-		fmt.Println(erro)
-	}
 }
 
 func main() {
@@ -74,5 +76,5 @@ func main() {
 	//)
 
 	sendEmailSimpleHTML(
-		"another subject", "<h1> im a header </h1> <p> im a paragraph </p>", []string{"charlesemilienpoulin@gmail.com"})
+		"another subject", "./test.html", []string{"charlesemilienpoulin@gmail.com"})
 }
