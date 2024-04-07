@@ -2,21 +2,17 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/smtp"
 	"os"
 
 	"github.com/joho/godotenv"
 )
 
-func sendEmailSimple() {
+func sendEmailSimple(subject string, body string, to []string) {
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
+	erro := godotenv.Load()
 	password := os.Getenv("EMAILPASSWORD")
+
 	auth := smtp.PlainAuth(
 		"",
 		"charlesemilienpoulin@gmail.com",
@@ -24,21 +20,24 @@ func sendEmailSimple() {
 		"smtp.gmail.com",
 	)
 
-	msg := "Subject: My special subject\n\nThis is the body of the email."
+	msg := "Subject:" + subject + "\n" + body
 
-	erro := smtp.SendMail(
+	err := smtp.SendMail(
 		"smtp.gmail.com:587",
 		auth,
 		"charlesemilienpoulin@gmail.com",
-		[]string{"charlesemilienpoulin@gmail.com"},
+		to,
 		[]byte(msg),
 	)
 
-	if erro != nil {
+	if err != nil {
 		fmt.Println(err)
+	}
+	if erro != nil {
+		fmt.Println(erro)
 	}
 }
 
 func main() {
-	sendEmailSimple()
+	sendEmailSimple("another subject", "another body", []string{"charlesemilienpoulin@gmail.com"})
 }
